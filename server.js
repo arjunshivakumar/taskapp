@@ -1,65 +1,37 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-const mysql = require('mysql2');
+const db = require('./db');
+const path = require('path');
 
 const app = express();
 const PORT = process.env.PORT || 8080;
 
-const path = require('path');
-
-app.use(express.static(path.join(__dirname, 'public')));
-app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public/index.html'));
-  });
 app.use(bodyParser.json());
+app.use(express.static(path.join(__dirname, 'public')));
 
-
-const db = mysql.createConnection({
-  host: "34.57.192.41",  // Cloud SQL Public IP
-  user: 'root',
-  password: "mysql123",
-  database: 'taskdb'
+// CRUD Routes
+app.get('/tasks', async (req, res) => {
+  const [rows] = await db.query('SELECT * FROM tasks');
+  res.json(rows);
 });
 
-db.connect(err => {
-  if (err) throw err;
-  console.log('Connected to MySQL');
+app.post('/tasks', async (req, res) => {
+  const { title } = req.body;
+  await db.query('INSERT INTO tasks (title) VALUES (?)', [title]);
+  res.status(201).send('Task added');
 });
 
-// CRUD Endpoints
-app.get('/tasks', (req, res) => {
-  db.query('SELECT * FROM tasks', (err, results) => {
-    if (err) return res.status(500).send(err);
-    res.json(results);
-  });
+app.put('/tasks/:id', async (req, res) => {
+  const { status } = req.body;
+  const { id } = req.params;
+  await db.query('UPDATE tasks SET status = ? WHERE id = ?', [status, id]);
+  res.send('Task updated');
 });
 
-app.post('/tasks', (req, res) => {
-  const { title, description } = req.body;
-  db.query('INSERT INTO tasks (title, description) VALUES (?, ?)', [title, description], (err, result) => {
-    if (err) return res.status(500).send(err);
-    res.json({ id: result.insertId, title, description, completed: false });
-  });
+app.delete('/tasks/:id', async (req, res) => {
+  const { id } = req.params;
+  await db.query('DELETE FROM tasks WHERE id = ?', [id]);
+  res.send('Task deleted');
 });
-
-app.put('/tasks/:id', (req, res) => {
-  const { completed } = req.body;
-  db.query('UPDATE tasks SET completed = ? WHERE id = ?', [completed, req.params.id], (err) => {
-    if (err) return res.status(500).send(err);
-    res.sendStatus(200);
-  });
-});
-
-app.delete('/tasks/:id', (req, res) => {
-  db.query('DELETE FROM tasks WHERE id = ?', [req.params.id], (err) => {
-    if (err) return res.status(500).send(err);
-    res.sendStatus(200);
-  });
-});
-
-app.get('/health', (req, res) => {
-    res.status(200).send('OK');
-  });
-  
 
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

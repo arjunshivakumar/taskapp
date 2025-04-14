@@ -1,19 +1,15 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8" />
   <title>Task Manager</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <h1>Task Manager</h1>
-
-  <form id="taskForm">
-    <input type="text" id="taskName" placeholder="Enter task" required />
-    <button type="submit">Add Task</button>
-  </form>
-
-  <ul id="taskList"></ul>
-
+  <input type="text" id="new-task" placeholder="New task" />
+  <button onclick="addTask()">Add</button>
+  <ul id="task-list"></ul>
   <script src="script.js"></script>
 </body>
 </html>
