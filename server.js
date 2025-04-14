@@ -5,7 +5,9 @@ const mysql = require('mysql2');
 const app = express();
 const PORT = process.env.PORT || 8080;
 
+app.use(express.static(path.join(__dirname, 'public')));
 app.use(bodyParser.json());
+
 
 const db = mysql.createConnection({
   host: process.env.DB_HOST,  // Cloud SQL Public IP
