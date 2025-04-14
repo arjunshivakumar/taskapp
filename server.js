@@ -5,14 +5,19 @@ const mysql = require('mysql2');
 const app = express();
 const PORT = process.env.PORT || 8080;
 
+const path = require('path');
+
 app.use(express.static(path.join(__dirname, 'public')));
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public/index.html'));
+  });
 app.use(bodyParser.json());
 
 
 const db = mysql.createConnection({
-  host: process.env.DB_HOST,  // Cloud SQL Public IP
+  host: "34.57.192.41",  // Cloud SQL Public IP
   user: 'root',
-  password: process.env.DB_PASS,
+  password: "mysql123",
   database: 'taskdb'
 });
 
@@ -51,5 +56,10 @@ app.delete('/tasks/:id', (req, res) => {
     res.sendStatus(200);
   });
 });
+
+app.get('/health', (req, res) => {
+    res.status(200).send('OK');
+  });
+  
 
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
